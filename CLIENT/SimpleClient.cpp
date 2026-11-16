@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 
+#include "ChatWindow.h"
 #include "Utils.h"
 #include "Net.h"
 
@@ -21,41 +22,69 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
+	ServerStatus status { "localhost", 4242, false };
+
+	const auto darkTheme = Theme(
+		{25, 25, 25, 255},
+		{50, 50, 50, 255},
+		RAYWHITE,
+		{ 244, 89, 41, 255 }
+	);
+	
+	ChatWindow chatWindow(600, 800, darkTheme, status);
+	chatWindow.updateTyping("...");
+
 	std::cout << "Kili Chat client init !\n";
 	
-	std::string currentServerIP = "localhost";
-	int currentServerPort = 4242;
+	std::string typing;
 	
-	while (true)
+	while (!WindowShouldClose())
 	{
-		std::string clientInput;
-		std::getline(std::cin, clientInput);
+		chatWindow.update();
 		
+		BeginDrawing();
+		chatWindow.draw();
+		EndDrawing();
+		
+		int inputChar = GetCharPressed();
+		if(inputChar != 0)
+		{
+			typing += static_cast<char>(inputChar);
+			chatWindow.updateTyping(typing);
+		}
+		if(IsKeyPressed(KEY_BACKSPACE) && !typing.empty())
+		{
+			typing.pop_back();
+			chatWindow.updateTyping(typing);
+		}
+		
+		std::string clientInput;
 		auto input = Utils::breakString(clientInput, ' ');
 		
 		if (input[0] == "close") break;
 		else if (input[0] == "ip")
 		{
-			currentServerIP = input[1];
-			std::cout << "Set server ip to: " << currentServerIP << '\n';
+			status.ip = input[1];
+			std::cout << "Set server ip to: " << status.ip << '\n';
 		}
 		else if (input[0] == "port")
 		{
-			currentServerPort = std::stoi(input[1]);
-			std::cout << "Set server port to: " << currentServerPort << '\n';
+			status.port = std::stoi(input[1]);
+			std::cout << "Set server port to: " << status.port << '\n';
 		}
 		else if (input[0] == "server")
 		{
-			std::cout << "current server: " << currentServerIP << ":" << currentServerPort << '\n';
+			std::cout << "current server: " << status.ip << ":" << status.port << '\n';
 		}
 		else if (input[0] == "send")
 		{
 			std::string message = clientInput.substr(clientInput.find_first_of(' '));
-			Net::sendMessageToServer(currentServerIP.c_str(), currentServerPort, message);
+			Net::sendMessageToServer(status.ip.c_str(), status.port, message);
 		}
 	}
 	
 	SDLNet_Quit();
+	CloseWindow();
 	
 	return 0;
 }

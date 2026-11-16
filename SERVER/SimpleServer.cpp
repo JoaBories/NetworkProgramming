@@ -63,6 +63,4 @@ int main(int argc, char* argv[]) {
 			Net::sendVerification(clientSocket);
 		}
 	}
-	
-	return 0;
 }
