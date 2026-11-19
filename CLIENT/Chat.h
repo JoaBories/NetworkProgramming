@@ -56,6 +56,7 @@ private:
     
     void resetBlink(bool newBlink);
     void addLine(std::string text, Color color = BLANK);
+    void drawLine(std::string text, float y, Color color) const;
     
 public:
     Chat(const theme& theme, const serverStatus& status);
