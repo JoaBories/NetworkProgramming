@@ -20,5 +20,4 @@ namespace Utils
         
         return strings;
     }    
-    
 };

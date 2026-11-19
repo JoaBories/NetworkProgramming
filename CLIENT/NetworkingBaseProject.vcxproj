@@ -134,13 +134,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ChatWindow.cpp" />
+    <ClCompile Include="Chat.cpp" />
     <ClCompile Include="Net.cpp" />
     <ClCompile Include="SimpleClient.cpp" />
     <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ChatWindow.h" />
+    <ClInclude Include="Chat.h" />
     <ClInclude Include="Net.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>

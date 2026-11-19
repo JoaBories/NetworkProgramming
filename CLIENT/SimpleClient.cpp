@@ -3,7 +3,7 @@
 #include <iostream>
 #include <string>
 
-#include "ChatWindow.h"
+#include "Chat.h"
 #include "Utils.h"
 #include "Net.h"
 
@@ -22,66 +22,40 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
-	ServerStatus status { "localhost", 4242, false };
-
-	const auto darkTheme = Theme(
+	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+	InitWindow(600, 800, "Kili chat");
+	SetTargetFPS(10);
+	
+	Font textFont = LoadFontEx("resources/CascadiaCode.ttf", 24, nullptr, 0);
+	Font titleFont = LoadFontEx("resources/CascadiaCode.ttf", 50, nullptr, 0);
+	
+	const auto darkTheme = theme(
 		{25, 25, 25, 255},
 		{50, 50, 50, 255},
-		RAYWHITE,
-		{ 244, 89, 41, 255 }
+		{ 245, 245, 245, 255 },
+		{ 244, 89, 41, 255 },
+		textFont, titleFont,
+		24.0f, 50.0f
 	);
 	
-	ChatWindow chatWindow(600, 800, darkTheme, status);
-	chatWindow.updateTyping("...");
+	serverStatus status { "localhost", 4242, false };
+	
+	Chat chat(darkTheme, status);
 
 	std::cout << "Kili Chat client init !\n";
 	
-	std::string typing;
-	
 	while (!WindowShouldClose())
 	{
-		chatWindow.update();
+		chat.update();
+		
+		if (chat.shouldQuit()) break;
 		
 		BeginDrawing();
-		chatWindow.draw();
+		chat.draw();
 		EndDrawing();
-		
-		int inputChar = GetCharPressed();
-		if(inputChar != 0)
-		{
-			typing += static_cast<char>(inputChar);
-			chatWindow.updateTyping(typing);
-		}
-		if(IsKeyPressed(KEY_BACKSPACE) && !typing.empty())
-		{
-			typing.pop_back();
-			chatWindow.updateTyping(typing);
-		}
-		
-		std::string clientInput;
-		auto input = Utils::breakString(clientInput, ' ');
-		
-		if (input[0] == "close") break;
-		else if (input[0] == "ip")
-		{
-			status.ip = input[1];
-			std::cout << "Set server ip to: " << status.ip << '\n';
-		}
-		else if (input[0] == "port")
-		{
-			status.port = std::stoi(input[1]);
-			std::cout << "Set server port to: " << status.port << '\n';
-		}
-		else if (input[0] == "server")
-		{
-			std::cout << "current server: " << status.ip << ":" << status.port << '\n';
-		}
-		else if (input[0] == "send")
-		{
-			std::string message = clientInput.substr(clientInput.find_first_of(' '));
-			Net::sendMessageToServer(status.ip.c_str(), status.port, message);
-		}
 	}
+	
+	UnloadFont(textFont);
 	
 	SDLNet_Quit();
 	CloseWindow();
