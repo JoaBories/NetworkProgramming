@@ -5,7 +5,6 @@
 #include "Net.h"
 #include "raylib.h"
 #include "Utils.h"
-#include <cmath>
 
 namespace
 {
@@ -156,6 +155,26 @@ void Chat::submit(const std::string& input)
 
 void Chat::update()
 {
+    if (IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL))
+    {
+        if (IsKeyPressed(KEY_V))
+        {
+            std::string clip = GetClipboardText();
+            mTyping.insert(mTypingPos, clip);
+            mTypingPos += clip.length();
+        }
+        else if (IsKeyPressed(KEY_C))
+        {
+            SetClipboardText(mTyping.c_str());
+        }
+        else if (IsKeyPressed(KEY_X))
+        {
+            SetClipboardText(mTyping.c_str());
+            mTyping.clear();
+            mTypingPos = 0;
+        }
+    }
+    
     const char inputChar = static_cast<char>(GetCharPressed());
     if(inputChar != 0)
     {
