@@ -30,8 +30,8 @@ int main(int argc, char* argv[]) {
 	Font titleFont = LoadFontEx("resources/CascadiaCode.ttf", 50, nullptr, 0);
 	
 	const auto darkTheme = theme(
-		{25, 25, 25, 255},
-		{50, 50, 50, 255},
+		{ 25, 25, 25, 255 },
+		{ 50, 50, 50, 255 },
 		{ 245, 245, 245, 255 },
 		{ 244, 89, 41, 255 },
 		textFont, titleFont,

@@ -1,10 +1,9 @@
 #include "Chat.h"
 
-#include <ios>
-
 #include "Net.h"
 #include "raylib.h"
 #include "Utils.h"
+#include <algorithm>
 
 namespace
 {
@@ -212,6 +211,13 @@ void Chat::update()
         mTyping.clear();
         mTypingPos = 0;
     }
+
+    const float scroll = GetMouseWheelMoveV().y;
+    if (std::abs(scroll) > 1e-6f)
+    {
+        const float max = std::max((float)mChat.size() * (mTheme.textSize + 1.0f) - (float)GetScreenHeight() * 0.825f, 0.0f);
+        mChatScroll = std::clamp(mChatScroll + scroll * 20.0f, 0.0f, max);
+    }
     
     if (SDLNet_CheckSockets(mSet, 1) == 1)
     {
@@ -233,10 +239,10 @@ void Chat::draw() const
     
     ClearBackground(mTheme.mainColor);
     
-    float yAnchor = h*0.85f-mTheme.textSize-10;
+    float yAnchor = h*0.85f-mTheme.textSize-10 + mChatScroll;
     for (size_t i = mChat.size()-1;; i--)
     {
-        float offset = (float)(mChat.size()-1-i) * mTheme.textSize + 1.0f;
+        float offset = (float)(mChat.size()-1-i) * (mTheme.textSize + 1.0f);
         drawLine(mChat[i].lText, yAnchor-offset, mChat[i].lColor);
         if (i == 0) break;
     }

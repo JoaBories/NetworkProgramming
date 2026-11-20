@@ -55,6 +55,8 @@ private:
     float mBlinkTime{0.0f};
     bool mBlink{false};
     
+    float mChatScroll{0.0f};
+    
     SDLNet_SocketSet mSet;
     TCPsocket mServerSocket;
     IPaddress mServerAddress;
