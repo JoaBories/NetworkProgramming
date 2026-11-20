@@ -204,9 +204,17 @@ void Chat::update()
         resetBlink(true);
     }
     
+    if (IsKeyPressed(KEY_UP) && !mLastTyping.empty())
+    {
+        mTyping = mLastTyping;
+        mTypingPos = mTyping.length();
+    }
+    
     if (IsKeyPressed(KEY_ENTER))
     {
         submit(mTyping);
+        
+        mLastTyping = mTyping;
         
         mTyping.clear();
         mTypingPos = 0;

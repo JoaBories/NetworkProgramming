@@ -47,6 +47,7 @@ private:
     serverStatus mStatus;
     std::vector<line> mChat;
     std::string mTyping{};
+    std::string mLastTyping{};
     uint32_t mTypingPos{0};
     theme mTheme;
     
