@@ -39,8 +39,8 @@ int main(int argc, char* argv[])
 	std::cout << "Enter port:";
 	
 	{
-		std::string portInput = "4242";
-		//std::cin >> portInput;
+		std::string portInput;
+		std::cin >> portInput;
 		
 		uint16_t port = 0xFFFF;
 		bool error = false;
@@ -80,6 +80,9 @@ int main(int argc, char* argv[])
 		SDLNet_Quit();
 		return 1;
 	}
+	
+	std::cout << "connect on local network using: \n";
+	std::cout << SDLNet_ResolveIP(&serverIp) << ":" << std::to_string(usingPort) << '\n';
 	
 	socketSet = SDLNet_AllocSocketSet(8);
 	
@@ -122,6 +125,8 @@ int main(int argc, char* argv[])
 					{
 						std::string msg = Net::receiveFrom(socket);
 						if (msg.empty()) break;
+						std::cout << pseudo << " -: " << msg << '\n';
+						
 						if (msg[0] == '/')
 						{
 							const size_t firstSpace = msg.find_first_of(' ');

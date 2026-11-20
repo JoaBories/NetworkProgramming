@@ -39,6 +39,7 @@ void Chat::drawLine(std::string text, float y, Color color) const
 Chat::Chat(const theme& theme, const serverStatus& status) : 
     mStatus(status), mTheme(theme)
 {
+    mSet = SDLNet_AllocSocketSet(1);
     addLine("! Welcome to KiliChat !", GREEN);
 }
 
@@ -88,11 +89,20 @@ void Chat::submit(const std::string& input)
         else if (command == "/connect")
         {
             addLine("connecting ...", mTheme.accentColor);
+            
+            if (mStatus)
+            {
+                Net::sendMessage("/disconnect", mServerSocket);
+                SDLNet_TCP_DelSocket(mSet, mServerSocket);
+                Net::closeConnection(mServerSocket);
+            }
+            
             if (Net::connectToServer(mStatus.ip.c_str(), mStatus.port, mServerSocket, mServerAddress))
             {
                 if (Net::sendMessage(param, mServerSocket))
                 {
                     mStatus.connected = true;
+                    SDLNet_TCP_AddSocket(mSet, mServerSocket);
                     removeLastLine();
                     addLine("connected to: " + std::string(SDLNet_ResolveIP(&mServerAddress)), GREEN);
                 }
@@ -108,7 +118,7 @@ void Chat::submit(const std::string& input)
                 addLine("connection failed", RED);
             }
         }
-        else if (command == "/disconnect")
+        else if (command == "/disconnect" && mStatus)
         {
             if (Net::sendMessage("/disconnect", mServerSocket))
             {
@@ -134,7 +144,6 @@ void Chat::submit(const std::string& input)
             if (Net::sendMessage(input, mServerSocket))
             {
                 removeLastLine();
-                addLine("me: " + input);
             }
             else
             {
@@ -185,7 +194,7 @@ void Chat::update()
         mTypingPos = 0;
     }
     
-    if (SDLNet_SocketReady(mServerSocket))
+    if (SDLNet_CheckSockets(mSet, 1) == 1)
     {
         const std::string msg = Net::receiveFrom(mServerSocket);
         if (!msg.empty())

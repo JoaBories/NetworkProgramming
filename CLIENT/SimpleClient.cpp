@@ -40,22 +40,24 @@ int main(int argc, char* argv[]) {
 	
 	serverStatus status { "localhost", 4242, false };
 	
-	Chat chat(darkTheme, status);
+	Chat* chat = new Chat(darkTheme, status);
 
 	std::cout << "Kili Chat client init !\n";
 	
 	while (!WindowShouldClose())
 	{
-		chat.update();
+		chat->update();
 		
-		if (chat.shouldQuit()) break;
+		if (chat->shouldQuit()) break;
 		
 		BeginDrawing();
-		chat.draw();
+		chat->draw();
 		EndDrawing();
 	}
 	
 	UnloadFont(textFont);
+	UnloadFont(titleFont);
+	delete chat;
 	
 	SDLNet_Quit();
 	CloseWindow();

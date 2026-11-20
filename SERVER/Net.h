@@ -23,6 +23,5 @@ namespace Net
         return "";
     }
     
-    bool tryReceiveMessage(const TCPsocket& serverSocket, TCPsocket& outSocket);
     bool sendVerification(const TCPsocket& clientSocket, bool verif);
 };
