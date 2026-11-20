@@ -2,19 +2,17 @@
 
 namespace Net
 {
-    bool connectToServer(const char* ip, uint16_t port, TCPsocket& outSocket)
+    bool connectToServer(const char* ip, uint16_t port, TCPsocket& outSocket, IPaddress& outIPaddress)
     {
-        IPaddress ipAdress;
-        
         // Getting ip
-        if (SDLNet_ResolveHost(&ipAdress, ip, port) == -1)
+        if (SDLNet_ResolveHost(&outIPaddress, ip, port) == -1)
         {
             std::cerr << "Resolve host error: " << SDLNet_GetError() << '\n';
             return false;
         }
 	
         // Creating socket
-        outSocket = SDLNet_TCP_Open(&ipAdress);
+        outSocket = SDLNet_TCP_Open(&outIPaddress);
         if (!outSocket)
         {
             std::cerr << "TCP Open socket error: " << SDLNet_GetError() << '\n';
@@ -29,27 +27,17 @@ namespace Net
         SDLNet_TCP_Close(socket);
     }
 
-    bool sendMessageToServer(const char* ip, const uint16_t port, const std::string& message)
+    bool sendMessageToServer(const std::string& message, const TCPsocket& serverSocket)
     {
-        TCPsocket socket;
-        if (connectToServer(ip, port, socket))
-        {
-            const bool success = sendMessage(message, socket);
-            closeConnection(socket);
-            return success;
-        }
-        return false;
+        return sendMessage(message, serverSocket);
     }
 
     bool sendMessage(const std::string& message, const TCPsocket socket)
     {
         if (sendTo(socket, message))
         {
-            std::cout << "me -= " << message << " | ";
-
-            std::string response = receiveFrom(socket);
-            if (!response.empty()) std::cout << "sent \n";
-            
+            const std::string response = receiveFrom(socket);
+            if (response.empty() || response != "ack") return false;
             return true;
         }
         return false;

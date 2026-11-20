@@ -17,12 +17,12 @@ namespace Net
 
     inline std::string receiveFrom(const TCPsocket dest)
     {
-        char buffer[1024];
+        char buffer[4096];
         const int bytesRead = SDLNet_TCP_Recv(dest, buffer, sizeof(buffer));
         if (bytesRead > 0) return buffer;
         return "";
     }
     
-    bool tryReceiveMessage(TCPsocket serverSocket, TCPsocket& outSocket);
-    bool sendVerification(TCPsocket clientSocket);
+    bool tryReceiveMessage(const TCPsocket& serverSocket, TCPsocket& outSocket);
+    bool sendVerification(const TCPsocket& clientSocket, bool verif);
 };

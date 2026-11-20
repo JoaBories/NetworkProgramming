@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
 
 	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
 	InitWindow(600, 800, "Kili chat");
-	SetTargetFPS(10);
+	SetTargetFPS(60);
 	
 	Font textFont = LoadFontEx("resources/CascadiaCode.ttf", 24, nullptr, 0);
 	Font titleFont = LoadFontEx("resources/CascadiaCode.ttf", 50, nullptr, 0);

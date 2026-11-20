@@ -1,6 +1,7 @@
 #pragma once
 
 #include <raylib.h>
+#include <SDL_net.h>
 #include <string>
 #include <vector>
 
@@ -54,12 +55,17 @@ private:
     float mBlinkTime{0.0f};
     bool mBlink{false};
     
+    TCPsocket mServerSocket;
+    IPaddress mServerAddress;
+    
     void resetBlink(bool newBlink);
+    void removeLastLine();
     void addLine(std::string text, Color color = BLANK);
     void drawLine(std::string text, float y, Color color) const;
     
 public:
     Chat(const theme& theme, const serverStatus& status);
+    ~Chat();
     void submit(const std::string& input);
     
     void update();

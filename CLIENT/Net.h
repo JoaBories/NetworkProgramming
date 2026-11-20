@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <raylib.h>
 #include <SDL_net.h>
 #include <string>
 
@@ -17,15 +18,15 @@ namespace Net
 
     inline std::string receiveFrom(const TCPsocket dest)
     {
-        char buffer[1024];
+        char buffer[4096];
         const int bytesRead = SDLNet_TCP_Recv(dest, buffer, sizeof(buffer));
         if (bytesRead > 0) return buffer;
         return "";
     }
     
-    bool connectToServer(const char* ip, uint16_t port, TCPsocket& outSocket);
+    bool connectToServer(const char* ip, uint16_t port, TCPsocket& outSocket, IPaddress& outIpAddress);
     bool sendMessage(const std::string& message, TCPsocket socket);
     void closeConnection(const TCPsocket& socket);
     
-    bool sendMessageToServer(const char* ip, uint16_t port, const std::string& message);
+    bool sendMessageToServer(const std::string& message, const TCPsocket& serverSocket);
 };

@@ -5,6 +5,7 @@
 #include "Net.h"
 #include "raylib.h"
 #include "Utils.h"
+#include <cmath>
 
 namespace
 {
@@ -18,6 +19,11 @@ void Chat::resetBlink(const bool newBlink)
 {
     mBlink = newBlink;
     mBlinkTime = 0.5f;
+}
+
+void Chat::removeLastLine()
+{
+    mChat.erase(mChat.end() - 1);
 }
 
 void Chat::addLine(std::string text, Color color)
@@ -34,6 +40,14 @@ Chat::Chat(const theme& theme, const serverStatus& status) :
     mStatus(status), mTheme(theme)
 {
     addLine("! Welcome to KiliChat !", GREEN);
+}
+
+Chat::~Chat()
+{
+    if (mStatus)
+    {
+        Net::sendMessage("/disconnect", mServerSocket);
+    }
 }
 
 void Chat::submit(const std::string& input)
@@ -71,15 +85,63 @@ void Chat::submit(const std::string& input)
             mStatus.port = std::stoi(param);
             addLine("Set server port to: " + std::to_string(mStatus.port));
         }
-        else if (command == "/server")
+        else if (command == "/connect")
         {
-            addLine("current server: " + mStatus.ip + ":" + std::to_string(mStatus.port));
+            addLine("connecting ...", mTheme.accentColor);
+            if (Net::connectToServer(mStatus.ip.c_str(), mStatus.port, mServerSocket, mServerAddress))
+            {
+                if (Net::sendMessage(param, mServerSocket))
+                {
+                    mStatus.connected = true;
+                    removeLastLine();
+                    addLine("connected to: " + std::string(SDLNet_ResolveIP(&mServerAddress)), GREEN);
+                }
+                else
+                {
+                    removeLastLine();
+                    addLine("connection failed", RED);
+                }
+            }
+            else
+            {
+                removeLastLine();
+                addLine("connection failed", RED);
+            }
+        }
+        else if (command == "/disconnect")
+        {
+            if (Net::sendMessage("/disconnect", mServerSocket))
+            {
+                mStatus.connected = false;
+                addLine("diconnected from: " + std::string(SDLNet_ResolveIP(&mServerAddress)), GREEN );
+                Net::closeConnection(mServerSocket);
+            }
+            else
+            {
+                addLine("disconnection failed", RED);
+            }
         }
     }
     else
     {
-        if (mStatus && Net::sendMessageToServer(mStatus.ip.c_str(), mStatus.port, input)) addLine("me:" + input);
-        else addLine("error sending message", RED);
+        if (!mStatus)
+        {
+            addLine(input);
+        }
+        else
+        {
+            addLine("sending ...", mTheme.accentColor);
+            if (Net::sendMessage(input, mServerSocket))
+            {
+                removeLastLine();
+                addLine("me: " + input);
+            }
+            else
+            {
+                removeLastLine();
+                addLine("error sending message", RED);
+            }
+        }
     }
 }
 
@@ -123,6 +185,15 @@ void Chat::update()
         mTypingPos = 0;
     }
     
+    if (SDLNet_SocketReady(mServerSocket))
+    {
+        const std::string msg = Net::receiveFrom(mServerSocket);
+        if (!msg.empty())
+        {
+            addLine(msg);
+        }
+    }
+    
     mBlinkTime -= GetFrameTime();
     if (mBlinkTime <= 0) resetBlink(!mBlink);
 }
@@ -138,7 +209,7 @@ void Chat::draw() const
     for (size_t i = mChat.size()-1;; i--)
     {
         float offset = (float)(mChat.size()-1-i) * mTheme.textSize + 1.0f;
-        drawLine(mChat[i].lText, yAnchor-offset, mChat[i].lColor); 
+        drawLine(mChat[i].lText, yAnchor-offset, mChat[i].lColor);
         if (i == 0) break;
     }
     
